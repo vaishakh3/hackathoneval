@@ -36,3 +36,10 @@ next-env.d.ts
 /.wrangler/
 /outputs/
 /work/
+
+# Evaluation desk database and uploads
+/.data/
+*.tsbuildinfo
+/.workflow-data/
+/app/.well-known/workflow/
+/.swc

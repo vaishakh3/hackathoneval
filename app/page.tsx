@@ -71,6 +71,7 @@ export default function Home() {
           <a href="#events">Events</a>
           <a href="#watch">Watch</a>
           <a href="#about">About</a>
+          <a href="/desk">Build Desk</a>
         </nav>
 
         <a

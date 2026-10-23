@@ -1,0 +1,14 @@
+.git
+node_modules
+.next
+.data
+.vercel
+.env*
+*.pem
+*.tsbuildinfo
+outputs
+work
+.agents
+.claude
+.codex
+.workflow-data
