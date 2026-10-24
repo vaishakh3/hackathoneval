@@ -4046,9 +4046,7 @@
   text-decoration: underline;
 }
 .d-repository-review {
-  max-height: 72vh;
-  overflow-y: auto;
-  padding-right: 8px;
+  padding: 24px 26px;
 }
 .d-repository-review h3 {
   font-size: 18px;
@@ -4104,4 +4102,9 @@
 .d-repository-review a {
   color: #5136bb;
   text-decoration: underline;
+}
+@media (max-width: 640px) {
+  .d-repository-review {
+    padding: 20px;
+  }
 }
