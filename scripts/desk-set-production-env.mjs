@@ -2,7 +2,8 @@ import fs from 'node:fs';
 import { randomBytes } from 'node:crypto';
 import { spawn } from 'node:child_process';
 process.loadEnvFile('.env.local');
-const team = 'team_nC5rrnpOuiWBRfA6TYMALVSw';
+const { orgId: team } = JSON.parse(fs.readFileSync('.vercel/project.json', 'utf8'));
+if (!team) throw new Error('Link this checkout to the intended Vercel project first.');
 if (!process.env.OPENAI_API_KEY)
   throw new Error('The local OpenAI credential is missing.');
 let code = process.env.ORGANIZER_SETUP_CODE;
@@ -18,9 +19,14 @@ fs.writeFileSync(
   `Devin Hacks Kochi\n\nChoose Create event in the deployed workspace.\nOrganizer access code: ${code}\n\nUse your own name, email, and password. Participant and mentor invitation links will be available in Event settings after creating the event. Keep this organizer code private.\n`,
   { mode: 0o600 },
 );
+if (!process.env.TRACKER_BRIDGE_SECRET) {
+  process.env.TRACKER_BRIDGE_SECRET = randomBytes(32).toString('base64url');
+  fs.appendFileSync('.env.local', `\nTRACKER_BRIDGE_SECRET=${process.env.TRACKER_BRIDGE_SECRET}\n`, { mode: 0o600 });
+}
 for (const [key, value] of [
   ['OPENAI_API_KEY', process.env.OPENAI_API_KEY],
   ['ORGANIZER_SETUP_CODE', code],
+  ['TRACKER_BRIDGE_SECRET', process.env.TRACKER_BRIDGE_SECRET],
 ]) {
   await new Promise((resolve, reject) => {
     const child = spawn(

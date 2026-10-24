@@ -39,6 +39,8 @@ The model receives submission text, uploaded evidence images, and bounded snapsh
 
 Jobs have persistent queued/running/completed/failed states, a three-job concurrency limit per event, bounded retries, and recovery of interrupted runs. Vercel Workflow runs evaluations in the background and continues after the browser closes. A database outbox records dispatch attempts; later authenticated requests recover an interrupted dispatch. Workflow steps receive only event and evaluation IDs; project evidence remains in the application database and private storage.
 
+For ongoing repository monitoring from a changing registration sheet, see [sheet-driven GitHub tracking](docs/github-tracker.md). A bound Google Apps Script sends signed snapshots on every form submission and every 15 minutes. The deployed app adds late submissions, retains missing links for retry, and records default-branch commit changes without a local computer running.
+
 ## Storage and access
 
 On Vercel, Neon Postgres stores event data, users, hashed sessions, review history, and audit records. Vercel private Blob stores image evidence, served only through an authenticated route. PostgreSQL transaction locks keep simultaneous registrations, reviews, uploads, and rate-limit increments consistent across instances. Participant polling filters other projects out inside the database before returning data.
@@ -51,22 +53,22 @@ Accounts currently belong to one event, and there is no password-reset or email-
 
 ## Vercel deployment
 
-The project is linked to `vaishakh3s-projects/devin-hacks-kochi`. Production application functions, private Blob, and Neon are in Singapore (`sin1`). The database uses the Neon Free plan; normal Vercel, storage, workflow, and OpenAI usage limits still apply.
+The deployment project is `animaregems-projects/hackathoneval`. Production application functions, private Blob, and Neon are in Singapore (`sin1`). The database uses the Neon Free plan; normal Vercel, storage, workflow, and OpenAI usage limits still apply.
 
-1. The deployment owner creates their organizer account in **Create event**, using the private organizer code saved in ignored `outputs/organizer-access.txt`.
+1. The deployment owner creates their organizer account in **Create event**, using the private organizer setup code from the deployment owner. An existing organizer can sign in directly.
 2. In **Event settings**, set the actual event dates, checkpoint deadlines, rubric, and number of demo slots.
 3. Copy the separate participant and mentor invitation links. These point directly at the deployed `/desk` workspace.
 
-`OPENAI_API_KEY` and `ORGANIZER_SETUP_CODE` are Vercel production secrets. The Neon and private Blob integrations provision their environment variables. Do not copy production credentials into previews or publish `.env*`, `.data`, `.vercel`, or `outputs`; `.vercelignore` excludes these from uploads.
+`OPENAI_API_KEY`, `ORGANIZER_SETUP_CODE`, and `TRACKER_BRIDGE_SECRET` are Vercel production secrets. The Neon and private Blob integrations provision their environment variables. Do not copy production credentials into previews or publish `.env*`, `.data`, `.vercel`, or `outputs`; `.vercelignore` excludes these from uploads.
 
 For a fresh database, load the intended environment through a secure env file and run `npm run db:migrate` with `DATABASE_URL` and the optional `DESK_DB_SCHEMA`. Migrations are versioned in `lib/desk/migrations/` and use the direct connection when `DATABASE_URL_UNPOOLED` is available. Never run test cleanup against an application schema.
 
 Release a tested production build:
 
 ```sh
-vercel deploy --prod --skip-domain --scope vaishakh3s-projects
+vercel deploy --prod --skip-domain --scope animaregems-projects
 # Verify the returned exact deployment URL.
-vercel promote <verified-deployment-url> --scope vaishakh3s-projects
+vercel promote <verified-deployment-url> --scope animaregems-projects
 ```
 
 `vercel curl` can test a protected deployment using the CLI's own authentication. The HTTP smoke script supports `DESK_TEST_PROTECTED=1` for this, and never extracts the CLI's bypass credential. After release, check that the stable production URL works without Vercel sign-in; application sign-in still protects projects and evidence.
@@ -75,6 +77,7 @@ vercel promote <verified-deployment-url> --scope vaishakh3s-projects
 
 ```sh
 npm run test:desk
+npm run test:tracker
 npx tsx --test scripts/desk-concurrency.test.ts
 npx tsc --noEmit
 npx oxlint app/api/desk app/desk components/desk lib/desk workflows scripts

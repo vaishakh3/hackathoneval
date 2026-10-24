@@ -234,6 +234,7 @@ export async function stateFor(user: User): Promise<DeskState> {
     .filter((u) => u.role === 'mentor')
     .map(({ id, name, skills }) => ({ id, name, skills }));
   if (user.role !== 'organizer') {
+    delete event.githubTracker;
     event.participantCode = '';
     event.mentorCode = '';
     event.audit = [];

@@ -3932,3 +3932,53 @@
     font-size: 14px;
   }
 }
+.d-tracker-setup {
+  margin: 24px 0;
+  padding: 24px;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  background: #fff;
+}
+.d-tracker-setup h2,
+.d-tracker-section-heading h2 {
+  font-size: 18px;
+  margin: 0 0 12px;
+}
+.d-tracker-setup p,
+.d-tracker-setup li {
+  color: #596273;
+  font-size: 14px;
+  line-height: 1.7;
+}
+.d-tracker-setup ol {
+  padding-left: 20px;
+}
+.d-tracker-metric {
+  padding: 22px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fff;
+}
+.d-tracker-metric strong {
+  display: block;
+  font-size: 30px;
+  margin-bottom: 8px;
+}
+.d-tracker-metric span {
+  color: #596273;
+  font-size: 13px;
+}
+.d-tracker-section-heading {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-top: 30px;
+}
+.d-tracker-section-heading a {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  font-size: 13px;
+}

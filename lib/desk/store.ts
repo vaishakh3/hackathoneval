@@ -38,7 +38,7 @@ export async function getParticipantEvent(
   // Filter on the database side: polling one project must not transfer the entire event's evidence.
   const row = (await db()
     .prepare(`SELECT (
-    e.data::jsonb || jsonb_build_object(
+    (e.data::jsonb - 'githubTracker') || jsonb_build_object(
       'projects', jsonb_build_array(p.project),
       'evaluations', COALESCE((SELECT jsonb_agg(v) FROM jsonb_array_elements(e.data::jsonb->'evaluations') v WHERE v->>'projectId'=p.project->>'id'),'[]'::jsonb),
       'reviews', COALESCE((SELECT jsonb_agg(v) FROM jsonb_array_elements(e.data::jsonb->'reviews') v WHERE v->>'projectId'=p.project->>'id'),'[]'::jsonb),

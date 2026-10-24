@@ -168,6 +168,7 @@ export type AuditEntry = {
   text: string;
 };
 export type DeskEvent = {
+  githubTracker?: import('./github-tracker').GithubTracker;
   id: string;
   name: string;
   theme: string;

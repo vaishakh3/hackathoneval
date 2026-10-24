@@ -16,7 +16,8 @@
     "format": "oxfmt",
     "test:desk": "tsx --test scripts/desk.test.ts",
     "test:desk:live": "tsx scripts/desk-smoke.ts",
-    "db:migrate": "tsx scripts/desk-migrate.ts"
+    "db:migrate": "tsx scripts/desk-migrate.ts",
+    "test:tracker": "tsx --test scripts/desk-tracker.test.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.99",

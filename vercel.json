@@ -3,6 +3,8 @@
   "framework": "nextjs",
   "regions": ["sin1"],
   "functions": {
-    "app/api/desk/route.ts": { "maxDuration": 180 }
+    "app/api/desk/route.ts": { "maxDuration": 180 },
+    "app/api/desk/tracker/route.ts": { "maxDuration": 180 },
+    "app/api/desk/tracker/ingest/route.ts": { "maxDuration": 180 }
   }
 }

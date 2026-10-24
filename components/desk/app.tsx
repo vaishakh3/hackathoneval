@@ -12,6 +12,7 @@ import {
   ClipboardCheck,
   Flag,
   FolderKanban,
+  GitBranch,
   LayoutGrid,
   Layers2,
   LogOut,
@@ -34,11 +35,13 @@ import {
 import { Participant } from './participant';
 import { MentorQueue, ReviewSession } from './mentor';
 import { ProjectDetail } from './project-detail';
+import { GithubTrackerView } from './github-tracker';
 import { Modal, request, type Action } from './ui';
 
 const organizerNav = [
   { id: 'overview', label: 'Overview', icon: LayoutGrid },
   { id: 'projects', label: 'Projects', icon: FolderKanban },
+  { id: 'github', label: 'GitHub tracker', icon: GitBranch },
   { id: 'reviews', label: 'Mentor reviews', icon: ClipboardCheck },
   { id: 'shortlist', label: 'Shortlist', icon: Flag },
 ];
@@ -227,6 +230,7 @@ export function DeskApp() {
   else if (user.role === 'mentor')
     content = <MentorQueue {...props} onReview={setReview} />;
   else if (view === 'projects') content = <Projects {...props} />;
+  else if (view === 'github') content = <GithubTrackerView {...props} />;
   else if (view === 'reviews') content = <Coverage {...props} />;
   else if (view === 'shortlist') content = <Shortlist {...props} />;
   else if (view === 'settings') content = <Settings {...props} />;
