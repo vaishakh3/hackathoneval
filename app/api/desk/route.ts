@@ -14,6 +14,7 @@ import {
 } from '@/lib/desk/store';
 import { seedDemo } from '@/lib/desk/demo';
 import { needsDispatch, dispatchEvaluations } from '@/lib/desk/dispatch';
+import { dispatchRepositoryJudgments } from '@/lib/desk/repo-judge-dispatch';
 export const runtime = 'nodejs';
 export const maxDuration = 180;
 const COOKIE = 'build-desk-session';
@@ -38,6 +39,8 @@ export async function GET(request: Request) {
     const state = await stateFor(user);
     if (needsDispatch(state.event))
       after(() => dispatchEvaluations(user.eventId));
+    if (state.event.githubTracker?.judge?.enabled)
+      after(() => dispatchRepositoryJudgments(user.eventId));
     return response(state);
   } catch (error) {
     return apiError(error);

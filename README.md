@@ -29,6 +29,8 @@ The server reads `OPENAI_API_KEY` from the ignored `.env.local`. A key has alrea
 
 ```dotenv
 OPENAI_MODEL=gpt-5.4-mini
+# Optional separate model for repository feature reviews:
+# REPO_JUDGE_MODEL=gpt-5.4-mini
 # Optional GitHub token for higher public-repository rate limits:
 # GITHUB_TOKEN=...
 # Optional persistent database location:
@@ -37,9 +39,17 @@ OPENAI_MODEL=gpt-5.4-mini
 
 The model receives submission text, uploaded evidence images, and bounded snapshots of public GitHub repositories: a pinned commit, its README, and up to two changed source files. Arbitrary demo links are not fetched, repositories are not executed, and missing evidence remains unknown. Mentors must verify actual behavior. Participant text and repository content are treated as untrusted evidence. Submitted evidence is sent to OpenAI for assessment; explain this to participants before collection.
 
-Jobs have persistent queued/running/completed/failed states, a three-job concurrency limit per event, bounded retries, and recovery of interrupted runs. Vercel Workflow runs evaluations in the background and continues after the browser closes. A database outbox records dispatch attempts; later authenticated requests recover an interrupted dispatch. Workflow steps receive only event and evaluation IDs; project evidence remains in the application database and private storage.
+Jobs have persistent queued/running/completed/failed states, a three-job concurrency limit per event, bounded retries, and recovery of interrupted runs. Vercel Workflow runs evaluations in the background and continues after the browser closes. A database outbox records dispatch attempts; later authenticated requests recover an interrupted dispatch. Checkpoint workflow steps receive event and evaluation IDs; project evidence remains in the application database and private storage. Repository judge steps also process bounded public source snapshots and intermediate findings.
 
 For ongoing repository monitoring from a changing registration sheet, see [sheet-driven GitHub tracking](docs/github-tracker.md). A bound Google Apps Script sends signed snapshots on every form submission and every 15 minutes. The deployed app adds late submissions, retains missing links for retry, and records default-branch commit changes without a local computer running.
+
+### Repository AI judge
+
+In **GitHub tracker**, organizers can enable the repository judge. Every current, readable submitted repository queues a review of its exact latest observed default-branch SHA. Later submissions and changed commits are queued by the hosted sheet bridge. Unchanged commits reuse their report. Three durable workers drain the queue without an open browser or Codex session; transient failures retry up to three times. Older reports remain available while a newer commit is being reviewed.
+
+Each review inventories implemented, partial, scaffolded, and documentation-only features, with commit-pinned file and line citations, architecture, recent changes, material caveats, and questions for the builder. Search repositories or participants, open **View review**, and download a Markdown report. This judge provides source evidence and does not alter the human finalist ranking.
+
+The judge inspects application code, UI, API handlers, data models, configuration, and tests across the repository. It downloads a bounded public archive (12 MB compressed / 64 MB expanded), falling back to individual pinned files through GitHub's tree API when the archive is unavailable or oversized. It excludes credentials, dependencies, generated files and binaries, and reads up to 160 eligible files / 720,000 source characters in multiple model batches. Reports disclose omitted/truncated files, incomplete trees, and unavailable diffs. It never executes repository code, builds, tests, or demos; an implemented source path is not proof that the deployed feature works. Projects without accessible supported source remain unjudged rather than receiving a negative score. Repository evidence and findings are processed by OpenAI and the durable workflow service.
 
 ## Storage and access
 
@@ -78,6 +88,7 @@ vercel promote <verified-deployment-url> --scope animaregems-projects
 ```sh
 npm run test:desk
 npm run test:tracker
+npm run test:judge
 npx tsx --test scripts/desk-concurrency.test.ts
 npx tsc --noEmit
 npx oxlint app/api/desk app/desk components/desk lib/desk workflows scripts

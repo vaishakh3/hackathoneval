@@ -5,6 +5,7 @@
   "functions": {
     "app/api/desk/route.ts": { "maxDuration": 180 },
     "app/api/desk/tracker/route.ts": { "maxDuration": 180 },
-    "app/api/desk/tracker/ingest/route.ts": { "maxDuration": 180 }
+    "app/api/desk/tracker/ingest/route.ts": { "maxDuration": 180 },
+    "app/api/desk/tracker/judge/route.ts": { "maxDuration": 180 }
   }
 }

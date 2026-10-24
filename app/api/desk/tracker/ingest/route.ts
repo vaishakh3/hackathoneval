@@ -1,4 +1,6 @@
 import { apiError } from '../../http';
+import { after } from 'next/server';
+import { dispatchRepositoryJudgments } from '@/lib/desk/repo-judge-dispatch';
 import { rateLimit, requireThat } from '@/lib/desk/store';
 import {
   ingestTrackerSnapshot,
@@ -41,6 +43,7 @@ export async function POST(request: Request) {
     );
     await rateLimit(`tracker-ingest:${snapshot.eventId}`, 20);
     const result = await ingestTrackerSnapshot(snapshot, true);
+    after(() => dispatchRepositoryJudgments(snapshot.eventId));
     return Response.json(result, { headers: { 'Cache-Control': 'no-store' } });
   } catch (error) {
     return apiError(error);

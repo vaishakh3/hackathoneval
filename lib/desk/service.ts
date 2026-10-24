@@ -292,6 +292,16 @@ export async function stateFor(user: User): Promise<DeskState> {
       event.conflicts = event.conflicts.filter((c) => c.mentorId === user.id);
     }
   }
+  // Keep organizer polling compact. Full repository reports are loaded on demand.
+  if (event.githubTracker) {
+    for (const repo of Object.values(event.githubTracker.repositories)) {
+      for (const judgment of repo.judgments || []) {
+        delete judgment.assessment;
+        delete judgment.sources;
+        delete judgment.coverage;
+      }
+    }
+  }
   return {
     user,
     event,

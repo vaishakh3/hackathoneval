@@ -3982,3 +3982,126 @@
   align-items: center;
   font-size: 13px;
 }
+.d-judge-overview {
+  padding: 24px;
+  margin: 24px 0;
+  background: #f5f3ff;
+  border: 1px solid #e3ddfa;
+  border-radius: 14px;
+}
+.d-judge-overview .d-tracker-section-heading {
+  margin-top: 0;
+}
+.d-judge-overview p,
+.d-repository-review p,
+.d-repository-review li {
+  font-size: 14px;
+  line-height: 1.75;
+}
+.d-judge-progress {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-top: 18px;
+}
+.d-judge-progress strong {
+  font-size: 22px;
+  margin-right: 5px;
+}
+.d-judge-search,
+.d-judge-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  font-size: 13px;
+  margin: 18px 0;
+}
+.d-judge-search input,
+.d-judge-filter select {
+  padding: 10px 12px;
+  border: 1px solid #d7dce5;
+  border-radius: 8px;
+  background: white;
+  max-width: 100%;
+}
+.d-judge-search input {
+  min-width: 240px;
+}
+.d-review-cell {
+  min-width: 155px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.d-text-button {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: #5136bb;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  text-decoration: underline;
+}
+.d-repository-review {
+  max-height: 72vh;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+.d-repository-review h3 {
+  font-size: 18px;
+  margin: 28px 0 12px;
+}
+.d-repository-review ul {
+  padding-left: 22px;
+}
+.d-repository-review li {
+  margin: 7px 0;
+}
+.d-judge-review-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  margin: 8px 0 16px;
+}
+.d-judge-features,
+.d-judge-caveats {
+  display: grid;
+  gap: 14px;
+}
+.d-judge-feature,
+.d-judge-caveats article {
+  padding: 18px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fff;
+}
+.d-judge-feature > div:first-child {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.d-judge-feature h4 {
+  margin: 0;
+  font-size: 15px;
+}
+.d-judge-feature p {
+  margin: 12px 0;
+}
+.d-judge-references {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.d-judge-references a,
+.d-repository-review a {
+  color: #5136bb;
+  text-decoration: underline;
+}

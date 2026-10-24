@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { addAudit } from './domain';
 import { getEvent, mutateEvent, requireThat } from './store';
 import type { DeskEvent, User } from './types';
+import { queueRepositoryJudgments } from './repo-judge-queue';
+import type { RepositoryJudgment } from './repo-judge-types';
 
 export const trackerSourceSchema = z.object({
   spreadsheetId: z.string().regex(/^[\w-]{20,150}$/),
@@ -40,6 +42,7 @@ type TrackerRow = TrackerSnapshot['rows'][number] & {
   issue?: string;
 };
 export type TrackedRepository = {
+  judgments?: RepositoryJudgment[];
   key: string;
   fullName: string;
   url: string;
@@ -57,6 +60,7 @@ export type TrackedRepository = {
   changes: { from: string; to: string; observedAt: string }[];
 };
 export type GithubTracker = {
+  judge?: { enabled: boolean; enabledAt: string };
   source: TrackerSource;
   configuredAt: string;
   sourceCapturedAt?: string;
@@ -383,6 +387,7 @@ export async function ingestTrackerSnapshot(
     }
     tracker.lastRefreshedAt = checkedAt;
     delete tracker.lease;
+    queueRepositoryJudgments(tracker, checkedAt);
   });
   const tracker = (await getEvent(snapshot.eventId)).githubTracker!;
   return {

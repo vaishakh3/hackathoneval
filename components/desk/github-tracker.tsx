@@ -4,6 +4,11 @@ import { useState } from 'react';
 import { ArrowDownToLine, ArrowUpRight, GitBranch } from 'lucide-react';
 import type { GithubTracker } from '@/lib/desk/github-tracker';
 import { Badge, Button, dateTime, type WorkspaceProps } from './ui';
+import {
+  RepositoryJudgeControls,
+  RepositoryReviewButton,
+  RepositoryReviewDetail,
+} from './repository-judge';
 
 const submissionSource = {
   spreadsheetId: '1Vj2u4DHR_Sqpnr2K3xfZPwdjCXMxokVaYy9Pns7VXFM',
@@ -17,6 +22,10 @@ export function GithubTrackerView({ data }: WorkspaceProps) {
   );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [selectedRepository, setSelectedRepository] = useState<string | null>(
+    null,
+  );
+  const [search, setSearch] = useState('');
   // Ordinary workspace polling supplies current server state without scheduling work in the browser.
   const current = data.event.githubTracker || tracker;
   const repos = Object.values(current?.repositories || {}).sort((a, b) =>
@@ -167,6 +176,7 @@ export function GithubTrackerView({ data }: WorkspaceProps) {
               </Button>
             </section>
           )}
+          <RepositoryJudgeControls tracker={current} />
           <div className="d-tracker-section-heading">
             <h2>Repositories</h2>
             <a
@@ -177,6 +187,15 @@ export function GithubTrackerView({ data }: WorkspaceProps) {
               Open submission sheet <ArrowUpRight size={14} />
             </a>
           </div>
+          <label className="d-judge-search">
+            Find a project
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Repository or participant name"
+              type="search"
+            />
+          </label>
           <p className="d-muted">
             A first observed commit establishes a baseline. Empty or
             inaccessible repos remain included and are retried. Late entrants
@@ -191,54 +210,68 @@ export function GithubTrackerView({ data }: WorkspaceProps) {
                   <th>Status</th>
                   <th>Latest observed commit</th>
                   <th>Changes observed</th>
+                  <th>AI judge</th>
                 </tr>
               </thead>
               <tbody>
-                {repos.map((repo) => (
-                  <tr key={repo.key}>
-                    <td>
-                      <strong>
-                        {repo.participants.join(', ') || 'Participant pending'}
-                      </strong>
-                      <br />
-                      <a href={repo.url} target="_blank" rel="noreferrer">
-                        {repo.fullName}
-                      </a>
-                    </td>
-                    <td>
-                      {repo.sourceRows.join(', ') || 'Previously submitted'}
-                    </td>
-                    <td>
-                      <Badge
-                        tone={repo.status === 'tracking' ? 'green' : 'amber'}
-                      >
-                        {repo.status}
-                      </Badge>
-                      {repo.error && (
-                        <small className="d-cell-note">{repo.error}</small>
-                      )}
-                    </td>
-                    <td>
-                      {repo.sha ? (
-                        <a
-                          href={`${repo.url}/commit/${repo.sha}`}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          {repo.sha.slice(0, 7)}
+                {repos
+                  .filter((repo) =>
+                    `${repo.fullName} ${repo.participants.join(' ')}`
+                      .toLowerCase()
+                      .includes(search.toLowerCase()),
+                  )
+                  .map((repo) => (
+                    <tr key={repo.key}>
+                      <td>
+                        <strong>
+                          {repo.participants.join(', ') ||
+                            'Participant pending'}
+                        </strong>
+                        <br />
+                        <a href={repo.url} target="_blank" rel="noreferrer">
+                          {repo.fullName}
                         </a>
-                      ) : (
-                        'Awaiting a readable commit'
-                      )}
-                      <small className="d-cell-note">
-                        {repo.lastSuccessAt
-                          ? dateTime(repo.lastSuccessAt)
-                          : 'Not observed yet'}
-                      </small>
-                    </td>
-                    <td>{repo.changes.length}</td>
-                  </tr>
-                ))}
+                      </td>
+                      <td>
+                        {repo.sourceRows.join(', ') || 'Previously submitted'}
+                      </td>
+                      <td>
+                        <Badge
+                          tone={repo.status === 'tracking' ? 'green' : 'amber'}
+                        >
+                          {repo.status}
+                        </Badge>
+                        {repo.error && (
+                          <small className="d-cell-note">{repo.error}</small>
+                        )}
+                      </td>
+                      <td>
+                        {repo.sha ? (
+                          <a
+                            href={`${repo.url}/commit/${repo.sha}`}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            {repo.sha.slice(0, 7)}
+                          </a>
+                        ) : (
+                          'Awaiting a readable commit'
+                        )}
+                        <small className="d-cell-note">
+                          {repo.lastSuccessAt
+                            ? dateTime(repo.lastSuccessAt)
+                            : 'Not observed yet'}
+                        </small>
+                      </td>
+                      <td>{repo.changes.length}</td>
+                      <td>
+                        <RepositoryReviewButton
+                          repo={repo}
+                          onOpen={() => setSelectedRepository(repo.key)}
+                        />
+                      </td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
           </div>
@@ -274,6 +307,14 @@ export function GithubTrackerView({ data }: WorkspaceProps) {
             </section>
           )}
         </>
+      )}
+      {selectedRepository && (
+        <RepositoryReviewDetail
+          key={selectedRepository}
+          repoKey={selectedRepository}
+          revision={data.event.revision}
+          onClose={() => setSelectedRepository(null)}
+        />
       )}
     </>
   );
