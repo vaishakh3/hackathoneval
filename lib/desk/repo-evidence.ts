@@ -209,11 +209,15 @@ export function selectRepositorySources(
       continue;
     }
     let text = content.slice(0, SOURCE_CHARACTER_LIMIT - characters);
+    const truncated = text.length < content.length;
     if (text.length < content.length) {
       text = text.slice(0, text.lastIndexOf('\n') + 1);
-      truncatedFiles.push(entry.path);
     }
-    if (!text.trim()) continue;
+    if (!text.trim()) {
+      omittedFiles.push(entry.path);
+      continue;
+    }
+    if (truncated) truncatedFiles.push(entry.path);
     files.push({
       id: `F${files.length + 1}`,
       path: entry.path,

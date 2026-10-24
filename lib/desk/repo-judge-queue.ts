@@ -1,6 +1,9 @@
 import { randomUUID } from 'node:crypto';
 import type { GithubTracker, TrackedRepository } from './github-tracker';
-import { REPO_JUDGE_VERSION } from './repo-judge-types';
+import {
+  REPO_JUDGE_VERSION,
+  normalizeJudgmentCoverage,
+} from './repo-judge-types';
 
 export const REVIEW_CONCURRENCY = 3;
 export const REVIEW_LEASE_MS = 20 * 60000;
@@ -16,6 +19,7 @@ export function queueRepositoryJudgments(tracker: GithubTracker, at: string) {
       continue;
     repo.judgments ||= [];
     for (const job of repo.judgments) {
+      normalizeJudgmentCoverage(job);
       if (
         job.status === 'running' &&
         Date.parse(job.leaseUntil || '') < Date.parse(at)

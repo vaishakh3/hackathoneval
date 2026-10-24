@@ -5,6 +5,7 @@ import { getEvent, mutateEvent, requireThat } from './store';
 import type { DeskEvent, User } from './types';
 import { queueRepositoryJudgments } from './repo-judge-queue';
 import type { RepositoryJudgment } from './repo-judge-types';
+import { normalizeJudgmentCoverage } from './repo-judge-types';
 
 export const trackerSourceSchema = z.object({
   spreadsheetId: z.string().regex(/^[\w-]{20,150}$/),
@@ -405,5 +406,9 @@ export function trackerFromEvent(event: DeskEvent, user: User) {
     'Organizer access is required.',
     403,
   );
+  if (event.githubTracker)
+    Object.values(event.githubTracker.repositories).forEach((repo) =>
+      repo.judgments?.forEach(normalizeJudgmentCoverage),
+    );
   return event.githubTracker || null;
 }

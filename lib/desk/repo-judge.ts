@@ -7,6 +7,7 @@ import type {
   ReviewCoverage,
   ReviewSource,
 } from './repo-judge-types';
+import { normalizeJudgmentCoverage } from './repo-judge-types';
 
 export async function enableRepositoryJudge(user: User) {
   requireThat(user.role === 'organizer', 'Organizer access is required.', 403);
@@ -162,5 +163,6 @@ export async function repositoryJudgmentFor(user: User, key: string) {
   requireThat(user.role === 'organizer', 'Organizer access is required.', 403);
   const repo = (await getEvent(user.eventId)).githubTracker?.repositories[key];
   requireThat(repo, 'Repository not found.', 404);
+  repo.judgments?.forEach(normalizeJudgmentCoverage);
   return repo;
 }

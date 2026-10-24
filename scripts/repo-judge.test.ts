@@ -38,6 +38,7 @@ import type {
   RepositoryAssessment,
   ReviewSource,
 } from '../lib/desk/repo-judge-types';
+import { normalizeJudgmentCoverage } from '../lib/desk/repo-judge-types';
 import type { User } from '../lib/desk/types';
 
 const directory = mkdtempSync(path.join(tmpdir(), 'repository-judge-'));
@@ -192,6 +193,38 @@ void test('coverage limits remain explicit rather than silently claiming to read
   assert.ok(result.coverage.inspectedCharacters <= SOURCE_CHARACTER_LIMIT);
   assert.ok(result.coverage.omittedFiles.length > 0);
   assert.ok(result.batches.length > 1);
+});
+void test('files with no complete line inside the remaining budget are omitted, including older saved coverage', () => {
+  const result = selectRepositorySources(
+    [180000, 180000, 180000, 179998, 100].map((size, i) => ({
+      path: `src/${i}.ts`,
+      bytes: Buffer.from('x'.repeat(size)),
+    })),
+  );
+  assert.equal(result.files.length, 4);
+  assert.deepEqual(result.coverage.omittedFiles, ['src/4.ts']);
+  assert.deepEqual(result.coverage.truncatedFiles, []);
+  assert.equal(
+    result.coverage.eligibleFiles,
+    result.coverage.inspectedFiles + result.coverage.omittedFiles.length,
+  );
+  const t = tracker();
+  queueRepositoryJudgments(t, new Date().toISOString());
+  const job = t.repositories['owner/app'].judgments![0];
+  job.coverage = {
+    ...result.coverage,
+    omittedFiles: [],
+    truncatedFiles: ['src/0.ts', 'src/4.ts'],
+  };
+  job.sources = result.files.map(({ text: _text, ...source }) => source);
+  job.assessment = {
+    ...assessment(),
+    limitations: ['Coverage is bounded: old counts.'],
+  };
+  normalizeJudgmentCoverage(job);
+  assert.deepEqual(job.coverage.omittedFiles, ['src/4.ts']);
+  assert.deepEqual(job.coverage.truncatedFiles, ['src/0.ts']);
+  assert.match(job.assessment.limitations[0], /1 files truncated/);
 });
 void test('archive failures fall back to the pinned file tree and disclose unreadable, oversized and truncated coverage', async () => {
   const urls: string[] = [];
