@@ -55,6 +55,8 @@ The judge inspects application code, UI, API handlers, data models, configuratio
 
 On Vercel, Neon Postgres stores event data, users, hashed sessions, review history, and audit records. Vercel private Blob stores image evidence, served only through an authenticated route. PostgreSQL transaction locks keep simultaneous registrations, reviews, uploads, and rate-limit increments consistent across instances. Participant polling filters other projects out inside the database before returning data.
 
+Workspace and worker status reads remove full repository assessments, source indexes, and coverage inside PostgreSQL before transferring data. A review detail request retrieves only the requested repository. Healthy browser polling runs every 30 seconds and slows to 60 seconds after an error. Full findings remain stored for detail views and exports. If Neon suspends the database after a service quota is exhausted, the API returns a service-unavailable message; restoring the provider allowance is required before sign-in can work. Resetting passwords does not resolve that condition.
+
 Local development can use SQLite (without `DATABASE_URL`) or the hosted database. A local `DESK_DB_PATH` forces SQLite for isolated tests. Hosted environments use separate database schemas: production defaults to `desk`, local development uses `desk_dev`, and automated remote checks use disposable `desk_test_*` schemas. Never point a preview or test run at the production schema.
 
 Passwords use salted scrypt; session cookies are HTTP-only, SameSite=Lax, and secure in production. The server enforces event boundaries, roles, invitation-derived access, review locks, evidence ownership, validation, and rate limits. Real events have no role switch. Production event creation requires `ORGANIZER_SETUP_CODE`; sample events are available only locally, so a public visitor cannot start paid evaluations by creating an arbitrary event.
@@ -89,6 +91,7 @@ vercel promote <verified-deployment-url> --scope animaregems-projects
 npm run test:desk
 npm run test:tracker
 npm run test:judge
+npm run test:read-model
 npx tsx --test scripts/desk-concurrency.test.ts
 npx tsc --noEmit
 npx oxlint app/api/desk app/desk components/desk lib/desk workflows scripts

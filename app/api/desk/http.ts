@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { DeskError, requireThat, sessionUser } from '@/lib/desk/store';
+import { isDatabaseQuotaError } from '@/lib/desk/service-errors';
 const COOKIE = 'build-desk-session';
 export function checkOrigin(request: Request) {
   const origin = request.headers.get('origin');
@@ -11,6 +12,16 @@ export function checkOrigin(request: Request) {
   );
 }
 export function apiError(error: unknown) {
+  if (isDatabaseQuotaError(error)) {
+    console.error('Build Desk database allowance exhausted', { code: '53000' });
+    return NextResponse.json(
+      {
+        error:
+          'The event database has reached its service limit. Please contact the event organizer.',
+      },
+      { status: 503, headers: { 'Retry-After': '300' } },
+    );
+  }
   if (error instanceof z.ZodError)
     return NextResponse.json(
       {

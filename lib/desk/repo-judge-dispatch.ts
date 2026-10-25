@@ -1,13 +1,13 @@
 import { start } from 'workflow/api';
 import { judgeRepository } from '@/workflows/judge-repository';
-import { getEvent, mutateEvent } from './store';
+import { getWorkspaceEvent, mutateEvent } from './store';
 import {
   reserveRepositoryJudgments,
   REVIEW_CONCURRENCY,
 } from './repo-judge-queue';
 
 export async function dispatchRepositoryJudgments(eventId: string) {
-  const tracker = (await getEvent(eventId)).githubTracker;
+  const tracker = (await getWorkspaceEvent(eventId)).githubTracker;
   if (!tracker?.judge?.enabled) return;
   const jobs = Object.values(tracker.repositories).flatMap(
     (repo) => repo.judgments || [],

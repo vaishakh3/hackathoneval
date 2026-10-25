@@ -1,5 +1,5 @@
 import { addAudit } from './domain';
-import { getEvent, mutateEvent, requireThat } from './store';
+import { getTrackedRepository, mutateEvent, requireThat } from './store';
 import { queueRepositoryJudgments, REVIEW_LEASE_MS } from './repo-judge-queue';
 import type { User } from './types';
 import type {
@@ -161,7 +161,7 @@ export async function failRepositoryJudgment(
 
 export async function repositoryJudgmentFor(user: User, key: string) {
   requireThat(user.role === 'organizer', 'Organizer access is required.', 403);
-  const repo = (await getEvent(user.eventId)).githubTracker?.repositories[key];
+  const repo = await getTrackedRepository(user.eventId, key);
   requireThat(repo, 'Repository not found.', 404);
   repo.judgments?.forEach(normalizeJudgmentCoverage);
   return repo;

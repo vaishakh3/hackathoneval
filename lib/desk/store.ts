@@ -1,6 +1,12 @@
 import { createHash, randomBytes, scrypt, timingSafeEqual } from 'node:crypto';
 import { promisify } from 'node:util';
 import type { DeskEvent, Role, User } from './types';
+import type { TrackedRepository } from './github-tracker';
+import {
+  compactWorkspaceEvent,
+  repositoryReadSql,
+  workspaceEventSql,
+} from './read-model';
 import { db, transaction, usesPostgres } from './database';
 export { db, transaction } from './database';
 const scryptAsync = promisify(scrypt);
@@ -50,6 +56,29 @@ export async function getParticipantEvent(
     .get(ownerId, id)) as { data: string } | undefined;
   requireThat(row, 'Project not found.', 404);
   return JSON.parse(row.data);
+}
+export async function getWorkspaceEvent(
+  id: string,
+  includeTracker = true,
+): Promise<DeskEvent> {
+  if (!usesPostgres())
+    return compactWorkspaceEvent(await getEvent(id), includeTracker);
+  const row = (await db()
+    .prepare(workspaceEventSql(includeTracker))
+    .get(id)) as { data: string } | undefined;
+  requireThat(row, 'Event not found.', 404);
+  return JSON.parse(row.data);
+}
+export async function getTrackedRepository(
+  id: string,
+  key: string,
+): Promise<TrackedRepository | undefined> {
+  if (!usesPostgres())
+    return (await getEvent(id)).githubTracker?.repositories[key];
+  const row = (await db().prepare(repositoryReadSql).get(key, id)) as
+    | { data: string | null }
+    | undefined;
+  return row?.data ? JSON.parse(row.data) : undefined;
 }
 export async function insertEvent(event: DeskEvent) {
   await db()

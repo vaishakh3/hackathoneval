@@ -18,7 +18,8 @@
     "test:desk:live": "tsx scripts/desk-smoke.ts",
     "db:migrate": "tsx scripts/desk-migrate.ts",
     "test:tracker": "tsx --test scripts/desk-tracker.test.ts",
-    "test:judge": "tsx --test scripts/repo-judge.test.ts"
+    "test:judge": "tsx --test scripts/repo-judge.test.ts",
+    "test:read-model": "tsx --test scripts/desk-read-model.test.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.99",

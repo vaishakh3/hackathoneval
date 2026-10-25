@@ -16,6 +16,7 @@ import {
   DeskError,
   transaction,
   getParticipantEvent,
+  getWorkspaceEvent,
 } from './store';
 import type {
   DeskEvent,
@@ -219,7 +220,7 @@ export async function stateFor(user: User): Promise<DeskState> {
   const event =
     user.role === 'participant'
       ? await getParticipantEvent(user.eventId, user.id)
-      : await getEvent(user.eventId);
+      : await getWorkspaceEvent(user.eventId, user.role === 'organizer');
   const reviewQueue =
     user.role === 'mentor'
       ? queueFor(event, user.id).map((s) => s.project.id)
@@ -290,16 +291,6 @@ export async function stateFor(user: User): Promise<DeskState> {
         shortlisted: false,
       }));
       event.conflicts = event.conflicts.filter((c) => c.mentorId === user.id);
-    }
-  }
-  // Keep organizer polling compact. Full repository reports are loaded on demand.
-  if (event.githubTracker) {
-    for (const repo of Object.values(event.githubTracker.repositories)) {
-      for (const judgment of repo.judgments || []) {
-        delete judgment.assessment;
-        delete judgment.sources;
-        delete judgment.coverage;
-      }
     }
   }
   return {

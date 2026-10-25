@@ -129,9 +129,12 @@ export function DeskApp() {
   const signedIn = !!data;
   useEffect(() => {
     if (!signedIn) return;
-    const timer = setInterval(() => {
-      if (!document.hidden) void load();
-    }, 10000);
+    const timer = setInterval(
+      () => {
+        if (!document.hidden) void load();
+      },
+      initialError ? 60000 : 30000,
+    );
     const wake = () => {
       if (!document.hidden) void load();
     };
@@ -140,7 +143,7 @@ export function DeskApp() {
       clearInterval(timer);
       document.removeEventListener('visibilitychange', wake);
     };
-  }, [signedIn, load]);
+  }, [signedIn, load, initialError]);
   useEffect(() => {
     if (!toast) return;
     const timeout = setTimeout(() => setToast(null), toast.error ? 9000 : 4500);

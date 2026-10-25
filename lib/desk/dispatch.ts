@@ -1,6 +1,6 @@
 import { start } from 'workflow/api';
 import { evaluateProject } from '@/workflows/evaluate-project';
-import { getEvent, mutateEvent } from './store';
+import { getWorkspaceEvent, mutateEvent } from './store';
 import type { DeskEvent } from './types';
 
 export function needsDispatch(event: DeskEvent) {
@@ -15,7 +15,7 @@ export function needsDispatch(event: DeskEvent) {
   );
 }
 export async function dispatchEvaluations(eventId: string) {
-  if (!needsDispatch(await getEvent(eventId))) return;
+  if (!needsDispatch(await getWorkspaceEvent(eventId, false))) return;
   const at = new Date().toISOString();
   const ids = await mutateEvent(eventId, (event) => {
     if (!needsDispatch(event)) return [];
